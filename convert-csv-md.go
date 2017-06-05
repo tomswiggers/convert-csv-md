@@ -43,17 +43,16 @@ func main() {
     check(err)
 
     i := 0
+    output := "|"
 
     for range record {
-      fmt.Println(record[i])
-
+      output = output + record[i] + "|"
       i++
     }
 
-		fmt.Println(record)
+    mdFp.WriteString(output + "\n")
+		fmt.Println(output)
 	}
-
-  mdFp.WriteString("test\n")
 
   csvFp.Close()
   mdFp.Close()
