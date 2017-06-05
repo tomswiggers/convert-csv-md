@@ -16,15 +16,33 @@ func check(e error) {
   }
 }
 
+func countHeader(record []string) (int) {
+  i := 0
+  c := 0
+
+  for range record {
+
+    if strings.Contains(record[i], "--") {
+      c++
+      fmt.Println("head")
+    }
+
+    i++
+  }
+
+  return c
+}
+
 func main() {
+  headerCounter := 0
 
   filename := flag.String("filename", "tables.csv", "a filename to parse")
   flag.Parse()
 
   filenameMd := strings.TrimSuffix(*filename, filepath.Ext(*filename)) + ".md"
 
-  fmt.Println("Use CSV: " + *filename);
-  fmt.Println("Use MD: " + filenameMd);
+  fmt.Println("Use CSV: " + *filename)
+  fmt.Println("Use MD: " + filenameMd)
 
   csvFp, err := os.Open(*filename)
   check(err)
@@ -42,11 +60,23 @@ func main() {
 
     check(err)
 
+    c := countHeader(record)
+
+    if c > 0 {
+      headerCounter = c
+    }
+
     i := 0
     output := "|"
 
     for range record {
-      output = output + record[i] + "|"
+
+      // This needs to be refactored
+      // doesn't work for the first line of the table
+      if i < headerCounter {
+        output = output + record[i] + "|"
+      }
+
       i++
     }
 
