@@ -33,8 +33,40 @@ func countHeader(record []string) (int) {
   return c
 }
 
+func countColumns(record []string) (int) {
+  i := 0
+  c := 0
+
+  for range record {
+
+    if len(record[i]) > 0 {
+      c++
+    }
+
+    i++
+  }
+
+  return c
+}
+
+func checkEndOfTable(record []string) (bool) {
+  i := 0
+
+  for range record {
+
+    if len(record[i]) > 0 {
+      return false
+    }
+
+    i++
+  }
+
+  return true
+}
+
 func main() {
   headerCounter := 0
+  beginTable := true
 
   filename := flag.String("filename", "tables.csv", "a filename to parse")
   flag.Parse()
@@ -60,10 +92,13 @@ func main() {
 
     check(err)
 
-    c := countHeader(record)
+    if beginTable {
+      headerCounter = countColumns(record)
+      beginTable = false
+    }
 
-    if c > 0 {
-      headerCounter = c
+    if checkEndOfTable(record) {
+      beginTable = true
     }
 
     i := 0
