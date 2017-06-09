@@ -6,6 +6,7 @@ import (
     "os"
     "io"
     "strings"
+    "strconv"
     "path/filepath"
     "encoding/csv"
 )
@@ -65,21 +66,21 @@ func checkEndOfTable(record []string) (bool) {
 }
 
 func main() {
+  var filenameMd string
+  var mdFp *os.File
+
   headerCounter := 0
+  tableCounter := 0
   beginTable := true
 
   filename := flag.String("filename", "tables.csv", "a filename to parse")
   flag.Parse()
 
-  filenameMd := strings.TrimSuffix(*filename, filepath.Ext(*filename)) + ".md"
-
   fmt.Println("Use CSV: " + *filename)
-  fmt.Println("Use MD: " + filenameMd)
 
   csvFp, err := os.Open(*filename)
   check(err)
 
-  mdFp, err := os.Create(filenameMd)
 
   r := csv.NewReader(csvFp)
 
@@ -95,9 +96,15 @@ func main() {
     if beginTable {
       headerCounter = countColumns(record)
       beginTable = false
+
+      tableCounter++
+
+      filenameMd = strings.TrimSuffix(*filename, filepath.Ext(*filename)) + strconv.Itoa(tableCounter) + ".md"
+      mdFp, err = os.Create(filenameMd)
     }
 
     if checkEndOfTable(record) {
+      mdFp.Close()
       beginTable = true
     }
 
@@ -106,8 +113,6 @@ func main() {
 
     for range record {
 
-      // This needs to be refactored
-      // doesn't work for the first line of the table
       if i < headerCounter {
         output = output + record[i] + "|"
       }
@@ -117,8 +122,8 @@ func main() {
 
     mdFp.WriteString(output + "\n")
 		fmt.Println(output)
+    defer mdFp.Close()
 	}
 
   csvFp.Close()
-  mdFp.Close()
 }
